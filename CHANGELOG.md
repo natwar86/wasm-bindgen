@@ -9,6 +9,18 @@
 
 ### Fixed
 
+### Removed
+
+## [0.2.127](https://github.com/wasm-bindgen/wasm-bindgen/compare/0.2.126...0.2.127)
+
+### Fixed
+
+* Fixed compilation with `(feature = "std", panic = "unwind", target_feature = "atomics")`
+  and prevented a `Task` leak when a future unwinds out of `poll` (via a Rust
+  panic or a foreign JS exception) in both the single-threaded and
+  multi-threaded executors.
+  [#5214](https://github.com/wasm-bindgen/wasm-bindgen/pull/5214)
+
 * Emscripten output now reaches wasm exports through emscripten's `wasmExports`
   object using bracket (string-literal) access (`wasmExports['__wbindgen_start']`)
   instead of a local `wasm` alias with dot access. `wasmExports['name']` is the
@@ -16,12 +28,11 @@
   and the wasm together, so the glue now survives and stays consistent under
   `-O3`/`-Os` (previously the export names were minified without updating the JS
   call sites, e.g. `__wbindgen_start is not defined`).
+  [#5217](https://github.com/wasm-bindgen/wasm-bindgen/pull/5217)
 
 * The emscripten detection marker static is no longer leaked as public API.
   [#5220](https://github.com/wasm-bindgen/wasm-bindgen/pull/5220)
   [#5222](https://github.com/wasm-bindgen/wasm-bindgen/pull/5222)
-
-### Removed
 
 ## [0.2.126](https://github.com/wasm-bindgen/wasm-bindgen/compare/0.2.125...0.2.126)
 
@@ -55,11 +66,6 @@
 
 * Relaxed alignment requirement for 8-byte types.
   [#5204](https://github.com/wasm-bindgen/wasm-bindgen/pull/5204)
-* Fixed compilation with `(feature = "std", panic = "unwind", target_feature = "atomics")`
-  and prevented a `Task` leak when a future unwinds out of `poll` (via a Rust
-  panic or a foreign JS exception) in both the single-threaded and
-  multi-threaded executors.
-  [#5214](https://github.com/wasm-bindgen/wasm-bindgen/pull/5214)
 
 * Headless Chrome/Edge tests now surface the WebDriver's own error message when
   session creation fails (e.g. a chromedriver/Chrome version mismatch) instead
