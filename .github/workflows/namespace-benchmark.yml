@@ -33,8 +33,9 @@ jobs:
           # Namespace cache volume: persists ~/.cargo and target/ across runs.
           # The dominant step's inner fixture builds all write to the shared
           # workspace target dir, so a warm volume should collapse it.
+          # Profile has caching enabled in the dashboard (4x16, Ubuntu 24.04).
           # First run populates the volume; judge by the SECOND run.
-          - runner: nscloud-ubuntu-24.04-amd64-4x16-with-cache
+          - runner: namespace-profile-benchmark1
             label: namespace-4vcpu-cachevol
             cache: true
     runs-on: ${{ matrix.runner }}
