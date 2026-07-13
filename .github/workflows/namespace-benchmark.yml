@@ -50,6 +50,19 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version: '24.15'
+    # GitHub images preinstall Chrome/chromedriver and Firefox/geckodriver;
+    # Namespace's Ubuntu image has neither, and one test-runner test
+    # (run_in_dedicated_worker) needs a WebDriver + browser.
+    - name: Install Chrome + matching chromedriver
+      if: startsWith(matrix.runner, 'nscloud')
+      run: |
+        wget -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo apt-get install -y -qq /tmp/chrome.deb
+        ver=$(google-chrome --version | grep -oE '[0-9][0-9.]+')
+        wget -qO /tmp/chromedriver.zip "https://storage.googleapis.com/chrome-for-testing-public/${ver}/linux64/chromedriver-linux64.zip"
+        unzip -q /tmp/chromedriver.zip -d /tmp
+        sudo mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/
+        chromedriver --version
     - run: npm i -g typescript
     - run: cargo test
     - run: cargo test -p wasm-bindgen-cli-support
