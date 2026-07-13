@@ -1,0 +1,54 @@
+# Benchmark: upstream's "Run native tests" job (main.yml `test_native`),
+# steps copied verbatim, run on three runner classes at the same commit.
+#
+# Upstream baseline for reference (wasm-bindgen/wasm-bindgen, ubuntu-latest,
+# last 5 runs on main as of 2026-07-13): 10m34s / 11m27s / 11m43s / 12m14s / 12m15s.
+#
+# Manual dispatch only. Never triggers on push or PR.
+name: Namespace benchmark (native tests)
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  native-tests:
+    name: native tests (${{ matrix.label }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Control: same runner class upstream uses (4 vCPU / 16 GB)
+          - runner: ubuntu-latest
+            label: github-4vcpu
+          # Like-for-like: Namespace at the same 4 vCPU / 16 GB
+          - runner: nscloud-ubuntu-24.04-amd64-4x16
+            label: namespace-4vcpu
+          # What a sponsorship grant would actually provision
+          - runner: nscloud-ubuntu-24.04-amd64-8x16
+            label: namespace-8vcpu
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v7
+    - uses: dtolnay/rust-toolchain@nightly
+      with:
+        targets: wasm32-unknown-unknown,wasm32-wasip1
+        components: rust-src
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: wasm32-unknown-unknown,wasm32-wasip1
+    - uses: actions/setup-node@v6
+      with:
+        node-version: '24.15'
+    - run: npm i -g typescript
+    - run: cargo test
+    - run: cargo test -p wasm-bindgen-cli-support
+    - run: cargo test -p wasm-bindgen-cli
+    - run: cargo test -p wasm-bindgen-macro-support
+    - run: cargo test -p wasm-bindgen-futures
+    - run: cargo test -p wasm-bindgen-shared
+    - run: cargo test -p wasm-bindgen-test-shared
