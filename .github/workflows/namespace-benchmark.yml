@@ -30,10 +30,24 @@ jobs:
           # What a sponsorship grant would actually provision
           - runner: nscloud-ubuntu-24.04-amd64-8x16
             label: namespace-8vcpu
+          # Namespace cache volume: persists ~/.cargo and target/ across runs.
+          # The dominant step's inner fixture builds all write to the shared
+          # workspace target dir, so a warm volume should collapse it.
+          # First run populates the volume; judge by the SECOND run.
+          - runner: nscloud-ubuntu-24.04-amd64-4x16-with-cache
+            label: namespace-4vcpu-cachevol
+            cache: true
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v7
+    - name: Mount cache volume over cargo home and target dir
+      if: matrix.cache
+      uses: namespacelabs/nscloud-cache-action@v1
+      with:
+        path: |
+          ~/.cargo
+          ./target
     # Nightly must stay the literal "nightly" channel: build-std tests invoke
     # `cargo +nightly` and rustup auto-installs latest nightly (without rust-src)
     # if that channel name is absent. Stable is pinned to 1.96.1, the version in
