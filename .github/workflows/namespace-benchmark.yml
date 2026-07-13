@@ -69,7 +69,7 @@ jobs:
     # Namespace's Ubuntu image has neither, and one test-runner test
     # (run_in_dedicated_worker) needs a WebDriver + browser.
     - name: Install Chrome + matching chromedriver
-      if: startsWith(matrix.runner, 'nscloud')
+      if: matrix.runner != 'ubuntu-latest'
       run: |
         wget -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
         sudo apt-get install -y -qq /tmp/chrome.deb
